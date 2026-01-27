@@ -11,4 +11,4 @@ Backend del progetto "Turista Facoltoso" sviluppato in Java con Maven e Javalin.
 - Java
 - Maven
 - Javalin
-- PostgreSQL (in arrivo)
+- PostgreSQL
