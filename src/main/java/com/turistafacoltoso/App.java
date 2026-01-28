@@ -1,7 +1,9 @@
 package com.turistafacoltoso;
 
-import java.sql.Connection;
-
+import com.turistafacoltoso.controller.AbitazioneController;
+import com.turistafacoltoso.controller.HostController;
+import com.turistafacoltoso.controller.PrenotazioneController;
+import com.turistafacoltoso.controller.UtenteController;
 import com.turistafacoltoso.util.DatabaseConnection;
 
 import io.javalin.Javalin;
@@ -10,21 +12,21 @@ public class App {
 
     public static void main(String[] args) {
 
-        try (Connection conn = DatabaseConnection.getConnection()) {
+        try {
+            DatabaseConnection.getConnection();
             System.out.println("Connessione al database riuscita");
         } catch (Exception e) {
+            System.err.println("Errore di connessione al database");
             e.printStackTrace();
+            return;
         }
 
-        Javalin app = Javalin.create(config -> {
-            config.showJavalinBanner = false;
-        });
+        Javalin app = Javalin.create().start(7000);
 
-        app.get("/", ctx -> {
-            ctx.result("Turista Facoltoso backend attivo");
-        });
-
-        app.start(7000);
+        new AbitazioneController(app);
+        new PrenotazioneController(app);
+        new HostController(app);
+        new UtenteController(app);
     }
 }
 

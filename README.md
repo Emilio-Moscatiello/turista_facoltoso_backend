@@ -12,3 +12,13 @@ Backend del progetto "Turista Facoltoso" sviluppato in Java con Maven e Javalin.
 - Maven
 - Javalin
 - PostgreSQL
+
+### Endpoint principali
+
+- GET /abitazioni/host/{codiceHost}
+- GET /prenotazioni/ultima/{utenteId}
+- GET /host/top-ultimo-mese
+- GET /host/super-host
+- GET /utenti/top-5-giorni-ultimo-mese
+
+Le API sono state testate tramite Postman.
