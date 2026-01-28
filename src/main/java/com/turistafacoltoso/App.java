@@ -21,7 +21,13 @@ public class App {
             return;
         }
 
-        Javalin app = Javalin.create().start(7000);
+        Javalin app = Javalin.create(config -> {
+            config.bundledPlugins.enableCors(cors -> {
+                cors.addRule(it -> {
+                    it.anyHost();
+                });
+            });
+        }).start(7000);
 
         new AbitazioneController(app);
         new PrenotazioneController(app);
