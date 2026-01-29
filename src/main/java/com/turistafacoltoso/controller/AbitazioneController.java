@@ -24,5 +24,10 @@ public class AbitazioneController {
             ctx.json(
                     abitazioneService.getAbitazionePiuGettonataUltimoMese());
         });
+
+        app.get("/abitazioni/media-posti-letto", ctx -> {
+            ctx.json(abitazioneService.getMediaPostiLetto());
+        });
+
     }
 }

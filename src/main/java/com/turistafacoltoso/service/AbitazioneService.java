@@ -27,4 +27,8 @@ public class AbitazioneService {
         return abitazioneRepository.findAbitazionePiuGettonataUltimoMese();
     }
 
+    public double getMediaPostiLetto() {
+        return abitazioneRepository.findMediaPostiLetto();
+    }
+
 }

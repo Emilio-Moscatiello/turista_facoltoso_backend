@@ -92,4 +92,28 @@ public class AbitazioneRepository {
         }
     }
 
+    private static final String MEDIA_POSTI_LETTO = """
+                SELECT AVG(numero_posti_letto) AS media_posti_letto
+                FROM abitazione
+            """;
+
+    public double findMediaPostiLetto() {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(MEDIA_POSTI_LETTO);
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getDouble("media_posti_letto");
+            }
+
+            return 0.0;
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Errore nel calcolo della media dei posti letto",
+                    e);
+        }
+    }
+
 }
