@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.turistafacoltoso.model.StatisticheHost;
+import com.turistafacoltoso.dto.StatisticheHostDTO;
 import com.turistafacoltoso.util.DatabaseConnection;
 
 public class HostRepository {
@@ -14,29 +14,35 @@ public class HostRepository {
     private static final String HOST_PIU_PRENOTAZIONI_MESE = """
             SELECT
                 h.codice_host,
-                COUNT(p.id) AS totale_prenotazioni
-            FROM prenotazione p
-            JOIN abitazione a ON p.abitazione_id = a.id
-            JOIN host h ON a.host_id = h.id
+                u.nome,
+                u.cognome,
+                COUNT(p.id) AS numero_prenotazioni
+            FROM host h
+            JOIN utente u ON h.utente_id = u.id
+            JOIN abitazione a ON a.host_id = h.id
+            JOIN prenotazione p ON p.abitazione_id = a.id
             WHERE p.data_inizio >= CURRENT_DATE - INTERVAL '1 month'
-            GROUP BY h.codice_host
-            ORDER BY totale_prenotazioni DESC
+            GROUP BY h.codice_host, u.nome, u.cognome
+            ORDER BY numero_prenotazioni DESC
             """;
 
     private static final String SUPER_HOST = """
             SELECT
                 h.codice_host,
-                COUNT(p.id) AS totale_prenotazioni
-            FROM prenotazione p
-            JOIN abitazione a ON p.abitazione_id = a.id
-            JOIN host h ON a.host_id = h.id
-            GROUP BY h.codice_host
+                u.nome,
+                u.cognome,
+                COUNT(p.id) AS numero_prenotazioni
+            FROM host h
+            JOIN utente u ON h.utente_id = u.id
+            JOIN abitazione a ON a.host_id = h.id
+            JOIN prenotazione p ON p.abitazione_id = a.id
+            GROUP BY h.codice_host, u.nome, u.cognome
             HAVING COUNT(p.id) >= 100
             """;
 
-    public List<StatisticheHost> findHostConPiuPrenotazioniUltimoMese() {
+    public List<StatisticheHostDTO> findHostConPiuPrenotazioniUltimoMese() {
 
-        List<StatisticheHost> result = new ArrayList<>();
+        List<StatisticheHostDTO> result = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(HOST_PIU_PRENOTAZIONI_MESE);
@@ -44,9 +50,11 @@ public class HostRepository {
 
             while (rs.next()) {
                 result.add(
-                        new StatisticheHost(
+                        new StatisticheHostDTO(
                                 rs.getString("codice_host"),
-                                rs.getLong("totale_prenotazioni")));
+                                rs.getString("nome"),
+                                rs.getString("cognome"),
+                                rs.getInt("numero_prenotazioni")));
             }
 
         } catch (Exception e) {
@@ -56,9 +64,9 @@ public class HostRepository {
         return result;
     }
 
-    public List<StatisticheHost> findSuperHost() {
+    public List<StatisticheHostDTO> findSuperHost() {
 
-        List<StatisticheHost> result = new ArrayList<>();
+        List<StatisticheHostDTO> result = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(SUPER_HOST);
@@ -66,9 +74,11 @@ public class HostRepository {
 
             while (rs.next()) {
                 result.add(
-                        new StatisticheHost(
+                        new StatisticheHostDTO(
                                 rs.getString("codice_host"),
-                                rs.getLong("totale_prenotazioni")));
+                                rs.getString("nome"),
+                                rs.getString("cognome"),
+                                rs.getInt("numero_prenotazioni")));
             }
 
         } catch (Exception e) {

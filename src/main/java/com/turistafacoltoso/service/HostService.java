@@ -2,7 +2,7 @@ package com.turistafacoltoso.service;
 
 import java.util.List;
 
-import com.turistafacoltoso.model.StatisticheHost;
+import com.turistafacoltoso.dto.StatisticheHostDTO;
 import com.turistafacoltoso.repository.HostRepository;
 
 public class HostService {
@@ -13,11 +13,11 @@ public class HostService {
         this.hostRepository = new HostRepository();
     }
 
-    public List<StatisticheHost> getHostPiuPrenotazioniUltimoMese() {
+    public List<StatisticheHostDTO> getHostPiuPrenotazioniUltimoMese() {
         return hostRepository.findHostConPiuPrenotazioniUltimoMese();
     }
 
-    public List<StatisticheHost> getSuperHost() {
+    public List<StatisticheHostDTO> getSuperHost() {
         return hostRepository.findSuperHost();
     }
 }
