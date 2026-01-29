@@ -19,5 +19,10 @@ public class AbitazioneController {
             String codiceHost = ctx.pathParam("codiceHost");
             ctx.json(abitazioneService.getAbitazioniByCodiceHost(codiceHost));
         });
+
+        app.get("/abitazioni/piu-gettonata", ctx -> {
+            ctx.json(
+                    abitazioneService.getAbitazionePiuGettonataUltimoMese());
+        });
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.turistafacoltoso.dto.AbitazioneDTO;
+import com.turistafacoltoso.dto.AbitazioneGettonataDTO;
 import com.turistafacoltoso.util.DatabaseConnection;
 
 public class AbitazioneRepository {
@@ -55,4 +56,40 @@ public class AbitazioneRepository {
                 rs.getInt("numero_posti_letto"), // 👈 QUI
                 rs.getBigDecimal("prezzo"));
     }
+
+    private static final String ABITAZIONE_PIU_GETTONATA = """
+                SELECT
+                    a.nome,
+                    a.indirizzo,
+                    COUNT(p.id) AS numero_prenotazioni
+                FROM prenotazione p
+                JOIN abitazione a ON p.abitazione_id = a.id
+                WHERE p.data_inizio >= CURRENT_DATE - INTERVAL '1 month'
+                GROUP BY a.id, a.nome, a.indirizzo
+                ORDER BY numero_prenotazioni DESC
+                LIMIT 1
+            """;
+
+    public AbitazioneGettonataDTO findAbitazionePiuGettonataUltimoMese() {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(ABITAZIONE_PIU_GETTONATA);
+                ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return new AbitazioneGettonataDTO(
+                        rs.getString("nome"),
+                        rs.getString("indirizzo"),
+                        rs.getInt("numero_prenotazioni"));
+            }
+
+            return null;
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Errore nel recupero dell'abitazione più gettonata",
+                    e);
+        }
+    }
+
 }

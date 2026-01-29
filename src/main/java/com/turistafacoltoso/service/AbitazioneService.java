@@ -3,6 +3,7 @@ package com.turistafacoltoso.service;
 import java.util.List;
 
 import com.turistafacoltoso.dto.AbitazioneDTO;
+import com.turistafacoltoso.dto.AbitazioneGettonataDTO;
 import com.turistafacoltoso.repository.AbitazioneRepository;
 
 public class AbitazioneService {
@@ -21,4 +22,9 @@ public class AbitazioneService {
 
         return abitazioneRepository.findByCodiceHost(codiceHost);
     }
+
+    public AbitazioneGettonataDTO getAbitazionePiuGettonataUltimoMese() {
+        return abitazioneRepository.findAbitazionePiuGettonataUltimoMese();
+    }
+
 }
