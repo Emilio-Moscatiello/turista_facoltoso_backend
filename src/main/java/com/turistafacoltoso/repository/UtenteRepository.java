@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.turistafacoltoso.model.StatisticheUtente;
+import com.turistafacoltoso.dto.StatisticheUtenteDTO;
 import com.turistafacoltoso.util.DatabaseConnection;
 
 public class UtenteRepository {
@@ -15,18 +15,19 @@ public class UtenteRepository {
             SELECT
                 u.nome,
                 u.cognome,
+                u.email,
                 SUM(p.data_fine - p.data_inizio) AS giorni_prenotati
             FROM prenotazione p
             JOIN utente u ON p.utente_id = u.id
             WHERE p.data_inizio >= CURRENT_DATE - INTERVAL '1 month'
-            GROUP BY u.id
+            GROUP BY u.nome, u.cognome, u.email
             ORDER BY giorni_prenotati DESC
             LIMIT 5
             """;
 
-    public List<StatisticheUtente> findTop5UtentiPerGiorniPrenotatiUltimoMese() {
+    public List<StatisticheUtenteDTO> findTop5UtentiPerGiorniPrenotatiUltimoMese() {
 
-        List<StatisticheUtente> risultato = new ArrayList<>();
+        List<StatisticheUtenteDTO> risultato = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(TOP_5_UTENTI_GIORNI_MESE);
@@ -34,10 +35,11 @@ public class UtenteRepository {
 
             while (rs.next()) {
                 risultato.add(
-                        new StatisticheUtente(
+                        new StatisticheUtenteDTO(
                                 rs.getString("nome"),
                                 rs.getString("cognome"),
-                                rs.getLong("giorni_prenotati")));
+                                rs.getString("email"),
+                                rs.getInt("giorni_prenotati")));
             }
 
         } catch (Exception e) {
