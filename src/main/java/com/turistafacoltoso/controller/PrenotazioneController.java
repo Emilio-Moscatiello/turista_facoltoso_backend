@@ -18,9 +18,10 @@ public class PrenotazioneController {
     private void registerRoutes(Javalin app) {
 
         app.get("/prenotazioni/ultima/{utenteId}", ctx -> {
-            String utenteIdParam = ctx.pathParam("utenteId");
 
+            String utenteIdParam = ctx.pathParam("utenteId");
             UUID utenteId;
+
             try {
                 utenteId = UUID.fromString(utenteIdParam);
             } catch (IllegalArgumentException e) {
@@ -28,10 +29,12 @@ public class PrenotazioneController {
                 return;
             }
 
-            prenotazioneService.getUltimaPrenotazioneUtente(utenteId)
-                    .ifPresentOrElse(
-                            prenotazione -> ctx.json(prenotazione),
-                            () -> ctx.status(404).result("Nessuna prenotazione trovata"));
+            try {
+                ctx.json(
+                        prenotazioneService.getUltimaPrenotazioneDettaglio(utenteId));
+            } catch (RuntimeException e) {
+                ctx.status(404).result("Nessuna prenotazione trovata");
+            }
         });
     }
 }

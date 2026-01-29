@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.turistafacoltoso.dto.PrenotazioneDettaglioDTO;
 import com.turistafacoltoso.model.Prenotazione;
 import com.turistafacoltoso.util.DatabaseConnection;
 
@@ -16,6 +17,25 @@ public class PrenotazioneRepository {
             FROM prenotazione
             WHERE utente_id = ?
             ORDER BY data_fine DESC
+            LIMIT 1
+            """;
+
+    private static final String FIND_ULTIMA_DETTAGLIO_BY_UTENTE = """
+            SELECT
+                p.data_inizio,
+                p.data_fine,
+
+                u.id      AS utente_id,
+                u.nome    AS utente_nome,
+                u.cognome AS utente_cognome,
+
+                a.id   AS abitazione_id,
+                a.nome AS abitazione_nome
+            FROM prenotazione p
+            JOIN utente u ON p.utente_id = u.id
+            JOIN abitazione a ON p.abitazione_id = a.id
+            WHERE p.utente_id = ?
+            ORDER BY p.data_fine DESC
             LIMIT 1
             """;
 
@@ -33,7 +53,43 @@ public class PrenotazioneRepository {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Errore nel recupero dell'ultima prenotazione", e);
+            throw new RuntimeException(
+                    "Errore nel recupero dell'ultima prenotazione",
+                    e);
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<PrenotazioneDettaglioDTO> findUltimaPrenotazioneDettaglioByUtenteId(UUID utenteId) {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_ULTIMA_DETTAGLIO_BY_UTENTE)) {
+
+            ps.setObject(1, utenteId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(
+                            new PrenotazioneDettaglioDTO(
+                                    rs.getDate("data_inizio")
+                                            .toLocalDate()
+                                            .toString(),
+                                    rs.getDate("data_fine")
+                                            .toLocalDate()
+                                            .toString(),
+                                    rs.getString("utente_id"),
+                                    rs.getString("utente_nome"),
+                                    rs.getString("utente_cognome"),
+                                    rs.getString("abitazione_id"),
+                                    rs.getString("abitazione_nome")));
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Errore nel recupero dell'ultima prenotazione dettagliata",
+                    e);
         }
 
         return Optional.empty();

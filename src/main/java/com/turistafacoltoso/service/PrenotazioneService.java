@@ -3,6 +3,7 @@ package com.turistafacoltoso.service;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.turistafacoltoso.dto.PrenotazioneDettaglioDTO;
 import com.turistafacoltoso.model.Prenotazione;
 import com.turistafacoltoso.repository.PrenotazioneRepository;
 
@@ -21,5 +22,16 @@ public class PrenotazioneService {
         }
 
         return prenotazioneRepository.findUltimaByUtenteId(utenteId);
+    }
+
+    public PrenotazioneDettaglioDTO getUltimaPrenotazioneDettaglio(UUID utenteId) {
+
+        if (utenteId == null) {
+            throw new IllegalArgumentException("ID utente non valido");
+        }
+
+        return prenotazioneRepository
+                .findUltimaPrenotazioneDettaglioByUtenteId(utenteId)
+                .orElseThrow(() -> new RuntimeException("Prenotazione non trovata"));
     }
 }
