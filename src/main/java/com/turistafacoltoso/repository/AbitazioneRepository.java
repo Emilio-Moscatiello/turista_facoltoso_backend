@@ -151,4 +151,91 @@ public class AbitazioneRepository {
                 rs.getDate("disponibilita_inizio").toLocalDate(),
                 rs.getDate("disponibilita_fine").toLocalDate());
     }
+
+    private static final String INSERT_FOR_HOST = """
+                INSERT INTO abitazione (
+                    id, host_id, nome, indirizzo,
+                    numero_locali, numero_posti_letto,
+                    piano, prezzo,
+                    disponibilita_inizio, disponibilita_fine
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+    public void saveForHost(UUID hostId, Abitazione abitazione) {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(INSERT_FOR_HOST)) {
+
+            ps.setObject(1, abitazione.getId());
+            ps.setObject(2, hostId);
+            ps.setString(3, abitazione.getNome());
+            ps.setString(4, abitazione.getIndirizzo());
+            ps.setInt(5, abitazione.getNumeroLocali());
+            ps.setInt(6, abitazione.getNumeroPostiLetto());
+            ps.setObject(7, abitazione.getPiano());
+            ps.setBigDecimal(8, abitazione.getPrezzo());
+            ps.setDate(9, java.sql.Date.valueOf(abitazione.getDisponibilitaInizio()));
+            ps.setDate(10, java.sql.Date.valueOf(abitazione.getDisponibilitaFine()));
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore creazione abitazione per host", e);
+        }
+    }
+
+    private static final String UPDATE_FOR_HOST = """
+                UPDATE abitazione
+                SET nome = ?, indirizzo = ?, numero_locali = ?, numero_posti_letto = ?,
+                    piano = ?, prezzo = ?, disponibilita_inizio = ?, disponibilita_fine = ?
+                WHERE id = ? AND host_id = ?
+            """;
+
+    public void updateForHost(UUID hostId, UUID abitazioneId, Abitazione abitazione) {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(UPDATE_FOR_HOST)) {
+
+            ps.setString(1, abitazione.getNome());
+            ps.setString(2, abitazione.getIndirizzo());
+            ps.setInt(3, abitazione.getNumeroLocali());
+            ps.setInt(4, abitazione.getNumeroPostiLetto());
+            ps.setObject(5, abitazione.getPiano());
+            ps.setBigDecimal(6, abitazione.getPrezzo());
+            ps.setDate(7, java.sql.Date.valueOf(abitazione.getDisponibilitaInizio()));
+            ps.setDate(8, java.sql.Date.valueOf(abitazione.getDisponibilitaFine()));
+            ps.setObject(9, abitazioneId);
+            ps.setObject(10, hostId);
+
+            if (ps.executeUpdate() == 0) {
+                throw new RuntimeException("Abitazione non trovata per questo host");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore aggiornamento abitazione", e);
+        }
+    }
+
+    private static final String DELETE_FOR_HOST = """
+                DELETE FROM abitazione
+                WHERE id = ? AND host_id = ?
+            """;
+
+    public void deleteForHost(UUID hostId, UUID abitazioneId) {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(DELETE_FOR_HOST)) {
+
+            ps.setObject(1, abitazioneId);
+            ps.setObject(2, hostId);
+
+            if (ps.executeUpdate() == 0) {
+                throw new RuntimeException("Abitazione non trovata per questo host");
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore eliminazione abitazione", e);
+        }
+    }
 }
