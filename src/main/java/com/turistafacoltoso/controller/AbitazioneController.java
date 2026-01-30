@@ -15,6 +15,10 @@ public class AbitazioneController {
 
     private void registerRoutes(Javalin app) {
 
+        app.get("/abitazioni", ctx -> {
+            ctx.json(abitazioneService.getAllAbitazioni());
+        });
+
         app.get("/abitazioni/host/{codiceHost}", ctx -> {
             String codiceHost = ctx.pathParam("codiceHost");
             ctx.json(abitazioneService.getAbitazioniByCodiceHost(codiceHost));
@@ -26,8 +30,8 @@ public class AbitazioneController {
         });
 
         app.get("/abitazioni/media-posti-letto", ctx -> {
-            ctx.json(abitazioneService.getMediaPostiLetto());
+            ctx.json(
+                    abitazioneService.getMediaPostiLetto());
         });
-
     }
 }

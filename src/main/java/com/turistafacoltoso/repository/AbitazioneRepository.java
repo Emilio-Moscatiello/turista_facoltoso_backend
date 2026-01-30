@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import com.turistafacoltoso.dto.AbitazioneDTO;
 import com.turistafacoltoso.dto.AbitazioneGettonataDTO;
+import com.turistafacoltoso.model.Abitazione;
 import com.turistafacoltoso.util.DatabaseConnection;
 
 public class AbitazioneRepository {
@@ -36,7 +37,7 @@ public class AbitazioneRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    result.add(mapRow(rs));
+                    result.add(mapRowDTO(rs));
                 }
             }
 
@@ -48,12 +49,12 @@ public class AbitazioneRepository {
         return result;
     }
 
-    private AbitazioneDTO mapRow(ResultSet rs) throws Exception {
+    private AbitazioneDTO mapRowDTO(ResultSet rs) throws Exception {
         return new AbitazioneDTO(
                 rs.getObject("id", UUID.class),
                 rs.getString("nome"),
                 rs.getString("indirizzo"),
-                rs.getInt("numero_posti_letto"), // 👈 QUI
+                rs.getInt("numero_posti_letto"),
                 rs.getBigDecimal("prezzo"));
     }
 
@@ -87,8 +88,7 @@ public class AbitazioneRepository {
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Errore nel recupero dell'abitazione più gettonata",
-                    e);
+                    "Errore nel recupero dell'abitazione più gettonata", e);
         }
     }
 
@@ -111,9 +111,44 @@ public class AbitazioneRepository {
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Errore nel calcolo della media dei posti letto",
-                    e);
+                    "Errore nel calcolo della media dei posti letto", e);
         }
     }
 
+    private static final String FIND_ALL = """
+                SELECT * FROM abitazione
+            """;
+
+    public List<Abitazione> findAll() {
+
+        List<Abitazione> list = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_ALL);
+                ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(mapRowEntity(rs));
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore recupero abitazioni", e);
+        }
+
+        return list;
+    }
+
+    private Abitazione mapRowEntity(ResultSet rs) throws Exception {
+        return new Abitazione(
+                rs.getObject("id", UUID.class),
+                rs.getObject("host_id", UUID.class),
+                rs.getString("nome"),
+                rs.getString("indirizzo"),
+                rs.getInt("numero_locali"),
+                rs.getInt("numero_posti_letto"),
+                rs.getObject("piano", Integer.class),
+                rs.getBigDecimal("prezzo"),
+                rs.getDate("disponibilita_inizio").toLocalDate(),
+                rs.getDate("disponibilita_fine").toLocalDate());
+    }
 }

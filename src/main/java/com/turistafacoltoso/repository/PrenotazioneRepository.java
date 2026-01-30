@@ -3,6 +3,7 @@ package com.turistafacoltoso.repository;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -37,6 +38,19 @@ public class PrenotazioneRepository {
             WHERE p.utente_id = ?
             ORDER BY p.data_fine DESC
             LIMIT 1
+            """;
+
+    private static final String INSERT = """
+                INSERT INTO prenotazione (id, utente_id, abitazione_id, data_inizio, data_fine)
+                VALUES (?, ?, ?, ?, ?)
+            """;
+
+    private static final String CHECK_OVERLAP = """
+                SELECT 1
+                FROM prenotazione
+                WHERE abitazione_id = ?
+                  AND data_inizio <= ?
+                  AND data_fine >= ?
             """;
 
     public Optional<Prenotazione> findUltimaByUtenteId(UUID utenteId) {
@@ -103,4 +117,43 @@ public class PrenotazioneRepository {
                 rs.getDate("data_inizio").toLocalDate(),
                 rs.getDate("data_fine").toLocalDate());
     }
+
+    public boolean existsOverlappingPrenotazione(
+            UUID abitazioneId,
+            LocalDate dataInizio,
+            LocalDate dataFine) {
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(CHECK_OVERLAP)) {
+
+            ps.setObject(1, abitazioneId);
+            ps.setDate(2, java.sql.Date.valueOf(dataFine));
+            ps.setDate(3, java.sql.Date.valueOf(dataInizio));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore controllo sovrapposizione prenotazioni", e);
+        }
+    }
+
+    public void save(Prenotazione prenotazione) {
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(INSERT)) {
+
+            ps.setObject(1, prenotazione.getId());
+            ps.setObject(2, prenotazione.getUtenteId());
+            ps.setObject(3, prenotazione.getAbitazioneId());
+            ps.setDate(4, java.sql.Date.valueOf(prenotazione.getDataInizio()));
+            ps.setDate(5, java.sql.Date.valueOf(prenotazione.getDataFine()));
+
+            ps.executeUpdate();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore durante il salvataggio della prenotazione", e);
+        }
+    }
+
 }

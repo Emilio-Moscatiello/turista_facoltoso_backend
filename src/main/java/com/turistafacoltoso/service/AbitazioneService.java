@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.turistafacoltoso.dto.AbitazioneDTO;
 import com.turistafacoltoso.dto.AbitazioneGettonataDTO;
+import com.turistafacoltoso.model.Abitazione;
 import com.turistafacoltoso.repository.AbitazioneRepository;
 
 public class AbitazioneService {
@@ -29,6 +30,10 @@ public class AbitazioneService {
 
     public double getMediaPostiLetto() {
         return abitazioneRepository.findMediaPostiLetto();
+    }
+
+    public List<Abitazione> getAllAbitazioni() {
+        return abitazioneRepository.findAll();
     }
 
 }
