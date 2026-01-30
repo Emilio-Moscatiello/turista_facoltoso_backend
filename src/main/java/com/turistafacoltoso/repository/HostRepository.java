@@ -99,8 +99,8 @@ public class HostRepository {
             """;
 
     private static final String INSERT = """
-                INSERT INTO host (id, utente_id, codice_host)
-                VALUES (?, ?, ?)
+                INSERT INTO host (utente_id, codice_host)
+                VALUES (?, ?)
             """;
 
     private static final String UPDATE = """
@@ -154,9 +154,8 @@ public class HostRepository {
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(INSERT)) {
 
-            ps.setObject(1, host.getId());
-            ps.setObject(2, host.getUtenteId());
-            ps.setString(3, host.getCodiceHost());
+            ps.setObject(1, host.getUtenteId());
+            ps.setString(2, host.getCodiceHost());
             ps.executeUpdate();
 
         } catch (Exception e) {
@@ -184,6 +183,8 @@ public class HostRepository {
     public void delete(UUID id) {
         try (Connection conn = DatabaseConnection.getConnection();
                 PreparedStatement ps = conn.prepareStatement(DELETE)) {
+
+            ps.setObject(1, id);
 
             if (ps.executeUpdate() == 0) {
                 throw new RuntimeException("Host non trovato");
