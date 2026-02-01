@@ -2,6 +2,7 @@ package com.turistafacoltoso.controller;
 
 import java.util.UUID;
 
+import com.turistafacoltoso.dto.AbitazioneCreateDTO;
 import com.turistafacoltoso.model.Abitazione;
 import com.turistafacoltoso.service.AbitazioneService;
 
@@ -39,12 +40,10 @@ public class AbitazioneController {
 
         app.post("/abitazioni/host/{hostId}", ctx -> {
             UUID hostId = UUID.fromString(ctx.pathParam("hostId"));
-            Abitazione abitazione = ctx.bodyAsClass(Abitazione.class);
+            AbitazioneCreateDTO dto = ctx.bodyAsClass(AbitazioneCreateDTO.class);
 
             ctx.status(201).json(
-                    abitazioneService.createAbitazioneForHost(
-                            hostId,
-                            abitazione));
+                    abitazioneService.createAbitazioneForHost(hostId, dto));
         });
 
         app.put("/abitazioni/host/{hostId}/{abitazioneId}", ctx -> {
@@ -66,5 +65,11 @@ public class AbitazioneController {
             abitazioneService.deleteAbitazioneForHost(hostId, abitazioneId);
             ctx.status(204);
         });
+
+        app.get("/host/{hostId}/abitazioni", ctx -> {
+            UUID hostId = UUID.fromString(ctx.pathParam("hostId"));
+            ctx.json(abitazioneService.getAbitazioniByHostId(hostId));
+        });
+
     }
 }

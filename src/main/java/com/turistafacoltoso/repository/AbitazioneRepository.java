@@ -238,4 +238,42 @@ public class AbitazioneRepository {
             throw new RuntimeException("Errore eliminazione abitazione", e);
         }
     }
+
+    private static final String FIND_BY_HOST_ID = """
+                SELECT
+                    id,
+                    nome,
+                    indirizzo,
+                    numero_posti_letto,
+                    prezzo
+                FROM abitazione
+                WHERE host_id = ?
+            """;
+
+    public List<AbitazioneDTO> findByHostId(UUID hostId) {
+        List<AbitazioneDTO> result = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_BY_HOST_ID)) {
+
+            ps.setObject(1, hostId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    result.add(new AbitazioneDTO(
+                            rs.getObject("id", UUID.class),
+                            rs.getString("nome"),
+                            rs.getString("indirizzo"),
+                            rs.getInt("numero_posti_letto"),
+                            rs.getBigDecimal("prezzo")));
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore recupero abitazioni host", e);
+        }
+
+        return result;
+    }
+
 }

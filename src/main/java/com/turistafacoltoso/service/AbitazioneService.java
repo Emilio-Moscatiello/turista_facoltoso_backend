@@ -1,8 +1,10 @@
 package com.turistafacoltoso.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import com.turistafacoltoso.dto.AbitazioneCreateDTO;
 import com.turistafacoltoso.dto.AbitazioneDTO;
 import com.turistafacoltoso.dto.AbitazioneGettonataDTO;
 import com.turistafacoltoso.model.Abitazione;
@@ -17,12 +19,17 @@ public class AbitazioneService {
     }
 
     public List<AbitazioneDTO> getAbitazioniByCodiceHost(String codiceHost) {
-
         if (codiceHost == null || codiceHost.isBlank()) {
             throw new IllegalArgumentException("Codice host non valido");
         }
-
         return abitazioneRepository.findByCodiceHost(codiceHost);
+    }
+
+    public List<AbitazioneDTO> getAbitazioniByHostId(UUID hostId) {
+        if (hostId == null) {
+            throw new IllegalArgumentException("Host ID non valido");
+        }
+        return abitazioneRepository.findByHostId(hostId);
     }
 
     public AbitazioneGettonataDTO getAbitazionePiuGettonataUltimoMese() {
@@ -37,14 +44,43 @@ public class AbitazioneService {
         return abitazioneRepository.findAll();
     }
 
-    public Abitazione createAbitazioneForHost(UUID hostId, Abitazione abitazione) {
+    public Abitazione createAbitazioneForHost(UUID hostId, AbitazioneCreateDTO dto) {
 
-        validateHostId(hostId);
-        validateAbitazione(abitazione);
-
-        if (abitazione.getId() == null) {
-            abitazione.setId(UUID.randomUUID());
+        if (hostId == null) {
+            throw new IllegalArgumentException("Host ID mancante");
         }
+
+        if (dto == null) {
+            throw new IllegalArgumentException("Dati abitazione mancanti");
+        }
+
+        if (dto.getNome() == null || dto.getNome().isBlank()) {
+            throw new IllegalArgumentException("Nome abitazione obbligatorio");
+        }
+
+        if (dto.getIndirizzo() == null || dto.getIndirizzo().isBlank()) {
+            throw new IllegalArgumentException("Indirizzo obbligatorio");
+        }
+
+        if (dto.getPostiLetto() <= 0) {
+            throw new IllegalArgumentException("Posti letto non validi");
+        }
+
+        if (dto.getPrezzo() == null || dto.getPrezzo().signum() <= 0) {
+            throw new IllegalArgumentException("Prezzo non valido");
+        }
+
+        Abitazione abitazione = new Abitazione(
+                UUID.randomUUID(),
+                hostId,
+                dto.getNome(),
+                dto.getIndirizzo(),
+                1,
+                dto.getPostiLetto(),
+                null,
+                dto.getPrezzo(),
+                LocalDate.now(),
+                LocalDate.now().plusYears(1));
 
         abitazioneRepository.saveForHost(hostId, abitazione);
         return abitazione;
@@ -55,63 +91,21 @@ public class AbitazioneService {
             UUID abitazioneId,
             Abitazione abitazione) {
 
-        validateHostId(hostId);
-        validateAbitazioneId(abitazioneId);
-        validateAbitazione(abitazione);
+        if (hostId == null || abitazioneId == null) {
+            throw new IllegalArgumentException("ID non validi");
+        }
 
         abitazioneRepository.updateForHost(hostId, abitazioneId, abitazione);
         abitazione.setId(abitazioneId);
-
         return abitazione;
     }
 
     public void deleteAbitazioneForHost(UUID hostId, UUID abitazioneId) {
 
-        validateHostId(hostId);
-        validateAbitazioneId(abitazioneId);
+        if (hostId == null || abitazioneId == null) {
+            throw new IllegalArgumentException("ID non validi");
+        }
 
         abitazioneRepository.deleteForHost(hostId, abitazioneId);
-    }
-
-    private void validateHostId(UUID hostId) {
-        if (hostId == null) {
-            throw new IllegalArgumentException("Host ID non valido");
-        }
-    }
-
-    private void validateAbitazioneId(UUID abitazioneId) {
-        if (abitazioneId == null) {
-            throw new IllegalArgumentException("Abitazione ID non valido");
-        }
-    }
-
-    private void validateAbitazione(Abitazione a) {
-
-        if (a == null) {
-            throw new IllegalArgumentException("Abitazione nulla");
-        }
-
-        if (a.getNome() == null || a.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome abitazione obbligatorio");
-        }
-
-        if (a.getIndirizzo() == null || a.getIndirizzo().isBlank()) {
-            throw new IllegalArgumentException("Indirizzo obbligatorio");
-        }
-
-        if (a.getNumeroPostiLetto() <= 0) {
-            throw new IllegalArgumentException("Numero posti letto non valido");
-        }
-
-        if (a.getPrezzo() == null || a.getPrezzo().signum() <= 0) {
-            throw new IllegalArgumentException("Prezzo non valido");
-        }
-
-        if (a.getDisponibilitaInizio() == null ||
-                a.getDisponibilitaFine() == null ||
-                a.getDisponibilitaFine().isBefore(a.getDisponibilitaInizio())) {
-
-            throw new IllegalArgumentException("Periodo di disponibilità non valido");
-        }
     }
 }
