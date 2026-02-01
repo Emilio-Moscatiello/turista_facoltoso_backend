@@ -3,6 +3,7 @@ package com.turistafacoltoso.service;
 import java.util.List;
 import java.util.UUID;
 
+import com.turistafacoltoso.dto.PrenotazioneHostDTO;
 import com.turistafacoltoso.dto.StatisticheHostDTO;
 import com.turistafacoltoso.model.Host;
 import com.turistafacoltoso.repository.HostRepository;
@@ -10,6 +11,8 @@ import com.turistafacoltoso.repository.HostRepository;
 public class HostService {
 
     private final HostRepository hostRepository;
+
+    private final PrenotazioneService prenotazioneService = new PrenotazioneService();
 
     public HostService() {
         this.hostRepository = new HostRepository();
@@ -43,6 +46,10 @@ public class HostService {
 
     public void deleteHost(UUID id) {
         hostRepository.delete(id);
+    }
+
+    public List<PrenotazioneHostDTO> getPrenotazioniByHostId(UUID hostId) {
+        return prenotazioneService.getPrenotazioniByHostId(hostId);
     }
 
 }

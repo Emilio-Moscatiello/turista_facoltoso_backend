@@ -51,5 +51,11 @@ public class HostController {
             ctx.status(204);
         });
 
+        app.get("/host/{id}/prenotazioni", ctx -> {
+            UUID hostId = UUID.fromString(ctx.pathParam("id"));
+            ctx.json(
+                    hostService.getPrenotazioniByHostId(hostId));
+        });
+
     }
 }

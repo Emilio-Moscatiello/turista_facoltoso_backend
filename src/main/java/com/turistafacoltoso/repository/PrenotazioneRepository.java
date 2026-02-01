@@ -4,10 +4,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.turistafacoltoso.dto.PrenotazioneDettaglioDTO;
+import com.turistafacoltoso.dto.PrenotazioneHostDTO;
 import com.turistafacoltoso.model.Prenotazione;
 import com.turistafacoltoso.util.DatabaseConnection;
 
@@ -154,6 +157,79 @@ public class PrenotazioneRepository {
         } catch (Exception e) {
             throw new RuntimeException("Errore durante il salvataggio della prenotazione", e);
         }
+    }
+
+    private static final String FIND_ALL = """
+                SELECT
+                    p.id,
+                    p.utente_id,
+                    p.abitazione_id,
+                    p.data_inizio,
+                    p.data_fine
+                FROM prenotazione p
+                ORDER BY p.data_fine DESC
+            """;
+
+    public List<Prenotazione> findAll() {
+        List<Prenotazione> list = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_ALL);
+                ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new Prenotazione(
+                        UUID.fromString(rs.getString("id")),
+                        UUID.fromString(rs.getString("utente_id")),
+                        UUID.fromString(rs.getString("abitazione_id")),
+                        rs.getDate("data_inizio").toLocalDate(),
+                        rs.getDate("data_fine").toLocalDate()));
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore recupero prenotazioni", e);
+        }
+
+        return list;
+    }
+
+    private static final String FIND_BY_HOST_ID = """
+                SELECT
+                    p.id               AS prenotazione_id,
+                    p.utente_id        AS utente_id,
+                    a.nome             AS abitazione_nome,
+                    p.data_inizio,
+                    p.data_fine
+                FROM prenotazione p
+                JOIN abitazione a ON p.abitazione_id = a.id
+                WHERE a.host_id = ?
+                ORDER BY p.data_inizio DESC
+            """;
+
+    public List<PrenotazioneHostDTO> findByHostId(UUID hostId) {
+        List<PrenotazioneHostDTO> list = new ArrayList<>();
+
+        try (Connection conn = DatabaseConnection.getConnection();
+                PreparedStatement ps = conn.prepareStatement(FIND_BY_HOST_ID)) {
+
+            ps.setObject(1, hostId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new PrenotazioneHostDTO(
+                            rs.getString("prenotazione_id"),
+                            rs.getString("utente_id"),
+                            rs.getString("abitazione_nome"),
+                            rs.getDate("data_inizio").toString(),
+                            rs.getDate("data_fine").toString()));
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Errore recupero prenotazioni per host", e);
+        }
+
+        return list;
     }
 
 }

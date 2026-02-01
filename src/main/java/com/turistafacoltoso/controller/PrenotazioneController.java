@@ -68,5 +68,9 @@ public class PrenotazioneController {
             }
         });
 
+        app.get("/prenotazioni", ctx -> {
+            ctx.json(prenotazioneService.getAllPrenotazioni());
+        });
+
     }
 }

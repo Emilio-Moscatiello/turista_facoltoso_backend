@@ -1,11 +1,13 @@
 package com.turistafacoltoso.service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.turistafacoltoso.dto.PrenotazioneCreateDTO;
 import com.turistafacoltoso.dto.PrenotazioneDettaglioDTO;
+import com.turistafacoltoso.dto.PrenotazioneHostDTO;
 import com.turistafacoltoso.model.Prenotazione;
 import com.turistafacoltoso.repository.PrenotazioneRepository;
 
@@ -102,6 +104,18 @@ public class PrenotazioneService {
 
         prenotazioneRepository.save(prenotazione);
         return prenotazione;
+    }
+
+    public List<Prenotazione> getAllPrenotazioni() {
+        return prenotazioneRepository.findAll();
+    }
+
+    public List<PrenotazioneHostDTO> getPrenotazioniByHostId(UUID hostId) {
+        if (hostId == null) {
+            throw new IllegalArgumentException("Host ID non valido");
+        }
+
+        return prenotazioneRepository.findByHostId(hostId);
     }
 
 }
