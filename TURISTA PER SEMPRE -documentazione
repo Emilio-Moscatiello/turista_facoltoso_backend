@@ -1,0 +1,236 @@
+TURISTA PER SEMPRE
+
+Progetto Full Stack Java & React
+Introduzione al progetto:
+
+Turista per sempre è una piattaforma full stack sviluppata per simulare il backoffice di un sistema di gestione prenotazioni per strutture ricettive.
+Il progetto è stato pensato per applicare in modo concreto i principali concetti di sviluppo web moderno, architettura a livelli, REST API, gestione di database relazionali e frontend component-based.
+
+L’applicazione consente di:
+- Gestire utenti e host
+- Gestire abitazioni
+- Creare e consultare prenotazioni
+- Controllare disponibilità e sovrapposizioni
+- Inserire feedback sulle prenotazioni
+- Visualizzare statistiche e informazioni aggregate
+
+Il progetto è diviso in backend Java e frontend React, mantenuti separati per rispettare le best practice real-world.
+
+
+BACKEND
+
+Architettura Backend (Java – Maven – Javalin – PostgreSQL)
+
+Il backend segue un’architettura a strati (layered architecture), che separa chiaramente le responsabilità:
+controller → service → repository → database
+
+Struttura delle cartelle backend:
+
+src/main/java/com/turistafacoltoso
+├── controller
+├── service
+├── repository
+├── model
+├── dto
+├── util
+└── exception
+
+
+
+CONTROLLER:
+
+Gestisce le rotte HTTP (REST API) tramite Javalin. Non contiene logica di business.
+Si occupa solo di:
+- ricevere la richiesta
+- validare input di base
+- chiamare il service
+- restituire la risposta HTTP
+
+Esempio (PrenotazioneController):
+
+app.get("/prenotazioni/ultima/{utenteId}", ctx -> {
+    UUID utenteId = UUID.fromString(ctx.pathParam("utenteId"));
+    ctx.json(prenotazioneService.getUltimaPrenotazioneDettaglio(utenteId));
+});
+
+
+
+SERVICE:
+
+Contiene la logica di business dell’applicazione.
+Qui avvengono:
+- validazioni complesse
+- controlli sulle date
+- regole applicative (es. sovrapposizioni prenotazioni)
+
+Esempio: controllo sovrapposizione prenotazioni
+
+if (prenotazioneRepository.existsOverlappingPrenotazione(
+        dto.getAbitazioneId(),
+        dto.getDataInizio(),
+        dto.getDataFine())) {
+    throw new IllegalArgumentException(
+        "L'abitazione non è disponibile nel periodo selezionato");
+}
+
+
+
+REPOSITORY:
+
+È lo strato che dialoga direttamente con PostgreSQL tramite JDBC.
+Responsabilità:
+- eseguire query SQL
+- mappare ResultSet → oggetti Java
+- non contenere logica di business
+
+Esempio: recupero prenotazioni per host con JOIN
+
+SELECT
+    p.id AS prenotazione_id,
+    p.utente_id,
+    a.nome AS abitazione_nome,
+    p.data_inizio,
+    p.data_fine
+FROM prenotazione p
+JOIN abitazione a ON p.abitazione_id = a.id
+WHERE a.host_id = ?
+ORDER BY p.data_fine DESC
+
+
+
+MODEL:
+
+Rappresenta le entità del dominio, cioè le tabelle del database. Rappresentano lo stato persistente, non il formato di risposta API.
+
+Esempio Abitazione:
+
+public class Abitazione {
+    private UUID id;
+    private UUID hostId;
+    private String nome;
+    private String indirizzo;
+    private int numeroPostiLetto;
+    private BigDecimal prezzo;
+}
+
+
+
+DTO (Data Transfer Object):
+
+I DTO servono a:
+- separare il modello interno dal formato API
+- evitare di esporre direttamente le entità
+- modellare risposte personalizzate
+
+Esempio: PrenotazioneDettaglioDTO
+
+public class PrenotazioneDettaglioDTO {
+    private String dataInizio;
+    private String dataFine;
+    private String utenteNome;
+    private String utenteCognome;
+    private String abitazioneNome;
+}
+
+Questo permette di restituire solo i dati necessari al frontend.
+
+
+
+UTIL:
+
+Contiene classi di supporto comuni, come la connessione al database.
+
+public class DatabaseConnection {
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
+    }
+}
+
+
+
+
+
+FRONTEND (React – TypeScript – Tailwind – DaisyUI)
+
+Il frontend è strutturato in modo component-based, seguendo le best practice React.
+
+Struttura frontend
+
+src
+├── api
+├── pages
+├── myComponents
+│   ├── forms
+│   └── tables
+├── layout
+├── router
+└── models
+
+
+
+API:
+
+Contiene tutte le funzioni che comunicano con il backend.
+
+Esempio:
+
+export async function getPrenotazioniByHostId(hostId: string) {
+    const res = await fetch(`${BASE_URL}/host/${hostId}/prenotazioni`);
+    return res.json();
+}
+
+Questo centralizza le chiamate HTTP e rende il codice pulito.
+
+
+
+PAGES:
+
+Ogni pagina rappresenta una vista principale.
+
+
+
+MYCOMPONENTS:
+
+Componenti riutilizzabili:
+- form (prenotazione, feedback)
+- tabelle
+
+
+
+LAYOUT:
+
+Contiene il layout globale dell’applicazione (navbar + outlet).
+
+<MainLayout>
+  <Outlet />
+</MainLayout>
+
+Questo permette di mantenere una UI coerente su tutte le pagine.
+
+
+
+ROUTER:
+
+Gestisce la navigazione tramite React Router.
+
+<Route path="/" element={<HomePage />} />
+<Route path="/prenotazioni" element={<PrenotazioniPage />} />
+
+
+
+
+
+INTEGRAZIONE FRONTEND - BACKEND
+
+Il flusso è:
+- L’utente interagisce con la UI
+- Il frontend chiama una funzione in api/
+- Il backend espone una REST API
+- Il controller delega al service
+- Il repository interroga il database
+- Il risultato torna come JSON
+- React aggiorna lo stato e il rendering
+
+
+
+
