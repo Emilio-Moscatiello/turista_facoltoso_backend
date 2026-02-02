@@ -17,30 +17,30 @@ import com.turistafacoltoso.util.DatabaseConnection;
 public class PrenotazioneRepository {
 
     private static final String FIND_ULTIMA_BY_UTENTE = """
-            SELECT *
-            FROM prenotazione
-            WHERE utente_id = ?
-            ORDER BY data_fine DESC
-            LIMIT 1
+                SELECT *
+                FROM prenotazione
+                WHERE utente_id = ?
+                ORDER BY data_fine DESC
+                LIMIT 1
             """;
 
     private static final String FIND_ULTIMA_DETTAGLIO_BY_UTENTE = """
-            SELECT
-                p.data_inizio,
-                p.data_fine,
+                SELECT
+                    p.data_inizio,
+                    p.data_fine,
 
-                u.id      AS utente_id,
-                u.nome    AS utente_nome,
-                u.cognome AS utente_cognome,
+                    u.id      AS utente_id,
+                    u.nome    AS utente_nome,
+                    u.cognome AS utente_cognome,
 
-                a.id   AS abitazione_id,
-                a.nome AS abitazione_nome
-            FROM prenotazione p
-            JOIN utente u ON p.utente_id = u.id
-            JOIN abitazione a ON p.abitazione_id = a.id
-            WHERE p.utente_id = ?
-            ORDER BY p.data_fine DESC
-            LIMIT 1
+                    a.id   AS abitazione_id,
+                    a.nome AS abitazione_nome
+                FROM prenotazione p
+                JOIN utente u ON p.utente_id = u.id
+                JOIN abitazione a ON p.abitazione_id = a.id
+                WHERE p.utente_id = ?
+                ORDER BY p.data_fine DESC
+                LIMIT 1
             """;
 
     private static final String INSERT = """
@@ -89,12 +89,8 @@ public class PrenotazioneRepository {
                 if (rs.next()) {
                     return Optional.of(
                             new PrenotazioneDettaglioDTO(
-                                    rs.getDate("data_inizio")
-                                            .toLocalDate()
-                                            .toString(),
-                                    rs.getDate("data_fine")
-                                            .toLocalDate()
-                                            .toString(),
+                                    rs.getDate("data_inizio").toLocalDate().toString(),
+                                    rs.getDate("data_fine").toLocalDate().toString(),
                                     rs.getString("utente_id"),
                                     rs.getString("utente_nome"),
                                     rs.getString("utente_cognome"),
@@ -137,7 +133,9 @@ public class PrenotazioneRepository {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Errore controllo sovrapposizione prenotazioni", e);
+            throw new RuntimeException(
+                    "Errore controllo sovrapposizione prenotazioni",
+                    e);
         }
     }
 
@@ -155,7 +153,9 @@ public class PrenotazioneRepository {
             ps.executeUpdate();
 
         } catch (Exception e) {
-            throw new RuntimeException("Errore durante il salvataggio della prenotazione", e);
+            throw new RuntimeException(
+                    "Errore durante il salvataggio della prenotazione",
+                    e);
         }
     }
 
@@ -171,6 +171,7 @@ public class PrenotazioneRepository {
             """;
 
     public List<Prenotazione> findAll() {
+
         List<Prenotazione> list = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -187,7 +188,9 @@ public class PrenotazioneRepository {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Errore recupero prenotazioni", e);
+            throw new RuntimeException(
+                    "Errore recupero prenotazioni",
+                    e);
         }
 
         return list;
@@ -195,18 +198,19 @@ public class PrenotazioneRepository {
 
     private static final String FIND_BY_HOST_ID = """
                 SELECT
-                    p.id               AS prenotazione_id,
-                    p.utente_id        AS utente_id,
-                    a.nome             AS abitazione_nome,
+                    p.id        AS prenotazione_id,
+                    p.utente_id AS utente_id,
+                    a.nome      AS abitazione_nome,
                     p.data_inizio,
                     p.data_fine
                 FROM prenotazione p
                 JOIN abitazione a ON p.abitazione_id = a.id
                 WHERE a.host_id = ?
-                ORDER BY p.data_inizio DESC
+                ORDER BY p.data_fine DESC
             """;
 
     public List<PrenotazioneHostDTO> findByHostId(UUID hostId) {
+
         List<PrenotazioneHostDTO> list = new ArrayList<>();
 
         try (Connection conn = DatabaseConnection.getConnection();
@@ -216,20 +220,22 @@ public class PrenotazioneRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    list.add(new PrenotazioneHostDTO(
-                            rs.getString("prenotazione_id"),
-                            rs.getString("utente_id"),
-                            rs.getString("abitazione_nome"),
-                            rs.getDate("data_inizio").toString(),
-                            rs.getDate("data_fine").toString()));
+                    list.add(
+                            new PrenotazioneHostDTO(
+                                    rs.getString("prenotazione_id"),
+                                    rs.getString("utente_id"),
+                                    rs.getString("abitazione_nome"),
+                                    rs.getDate("data_inizio").toString(),
+                                    rs.getDate("data_fine").toString()));
                 }
             }
 
         } catch (Exception e) {
-            throw new RuntimeException("Errore recupero prenotazioni per host", e);
+            throw new RuntimeException(
+                    "Errore recupero prenotazioni per host",
+                    e);
         }
 
         return list;
     }
-
 }

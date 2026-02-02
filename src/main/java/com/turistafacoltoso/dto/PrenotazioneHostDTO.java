@@ -8,10 +8,8 @@ import lombok.Data;
 public class PrenotazioneHostDTO {
 
     private String prenotazioneId;
-
     private String utenteId;
     private String abitazioneNome;
-
     private String dataInizio;
     private String dataFine;
 }

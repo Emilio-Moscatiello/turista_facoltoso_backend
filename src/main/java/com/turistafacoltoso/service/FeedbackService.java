@@ -17,23 +17,16 @@ public class FeedbackService {
 
     public Feedback createFeedback(UUID prenotazioneId, FeedbackCreateDTO dto) {
 
-        if (prenotazioneId == null) {
-            throw new IllegalArgumentException("Prenotazione ID mancante");
-        }
-
-        if (dto == null) {
-            throw new IllegalArgumentException("Dati feedback mancanti");
-        }
-
-        if (dto.getVoto() < 1 || dto.getVoto() > 5) {
-            throw new IllegalArgumentException("Il voto deve essere tra 1 e 5");
+        if (dto.getPunteggio() < 1 || dto.getPunteggio() > 5) {
+            throw new IllegalArgumentException("Il punteggio deve essere tra 1 e 5");
         }
 
         Feedback feedback = new Feedback(
                 UUID.randomUUID(),
                 prenotazioneId,
-                dto.getVoto(),
-                dto.getCommento(),
+                dto.getTitolo(),
+                dto.getTesto(),
+                dto.getPunteggio(),
                 LocalDateTime.now());
 
         feedbackRepository.save(feedback);

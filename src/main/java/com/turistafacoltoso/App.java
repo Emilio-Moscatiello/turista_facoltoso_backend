@@ -1,6 +1,7 @@
 package com.turistafacoltoso;
 
 import com.turistafacoltoso.controller.AbitazioneController;
+import com.turistafacoltoso.controller.FeedbackController;
 import com.turistafacoltoso.controller.HostController;
 import com.turistafacoltoso.controller.PrenotazioneController;
 import com.turistafacoltoso.controller.UtenteController;
@@ -33,6 +34,8 @@ public class App {
         new PrenotazioneController(app);
         new HostController(app);
         new UtenteController(app);
+        new FeedbackController(app);
+
     }
 }
 

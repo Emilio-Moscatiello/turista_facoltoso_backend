@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class FeedbackCreateDTO {
-    private int voto;
-    private String commento;
+    private int punteggio;
+    private String titolo;
+    private String testo;
 }

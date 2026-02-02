@@ -9,8 +9,8 @@ import com.turistafacoltoso.util.DatabaseConnection;
 public class FeedbackRepository {
 
     private static final String INSERT = """
-                INSERT INTO feedback (id, prenotazione_id, voto, commento)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO feedback (id, prenotazione_id, titolo, testo, punteggio)
+                VALUES (?, ?, ?, ?, ?)
             """;
 
     public void save(Feedback feedback) {
@@ -20,8 +20,9 @@ public class FeedbackRepository {
 
             ps.setObject(1, feedback.getId());
             ps.setObject(2, feedback.getPrenotazioneId());
-            ps.setInt(3, feedback.getVoto());
-            ps.setString(4, feedback.getCommento());
+            ps.setString(3, feedback.getTitolo());
+            ps.setString(4, feedback.getTesto());
+            ps.setInt(5, feedback.getPunteggio());
 
             ps.executeUpdate();
 

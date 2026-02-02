@@ -14,7 +14,8 @@ public class Feedback {
 
     private UUID id;
     private UUID prenotazioneId;
-    private int voto;
-    private String commento;
+    private String titolo;
+    private String testo;
+    private int punteggio;
     private LocalDateTime creatoIl;
 }
