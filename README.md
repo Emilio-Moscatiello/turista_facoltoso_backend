@@ -18,6 +18,7 @@ Il progetto consente la gestione di **utenti, host, abitazioni, prenotazioni e f
 - DAO Pattern
 - DTO Pattern
 - Lombok
+- JUnit 4.11 (test backend)
 
 ### Frontend
 - React
@@ -86,3 +87,14 @@ Il progetto consente la gestione di **utenti, host, abitazioni, prenotazioni e f
 
 ---
 
+## Test Backend
+Il progetto include test unitari semplici, pensati per:
+- verificare la corretta istanziazione dei componenti
+- validare la struttura del progetto
+- dimostrare la conoscenza di Maven + JUnit
+
+Tecnologie di test:
+- JUnit 4.11
+- Maven Surefire Plugin (default)
+
+---

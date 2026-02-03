@@ -234,3 +234,102 @@ Il flusso è:
 
 
 
+
+TEST E VALIDAZIONE DEL BACKEND:
+
+Il progetto Turista per Sempre include una prima suite di test unitari semplici, pensati per:
+- confermare il corretto funzionamento delle classi principali
+- validare le regole di business più critiche
+- verificare che i componenti fondamentali del backend siano istanziabili e utilizzabili
+
+I test del backend sono collocati nella directory standard Maven:
+src/test/java/com/turistafacoltoso/
+
+struttura:
+
+src/test/java/com/turistafacoltoso
+├── dto
+│   └── DTOPrenotazioneValidiTest.java
+├── service
+│   ├── PrenotazioneServiceTest.java
+│   └── PrenotazioneDataPassataTest.java
+└── AppTest.java
+
+Questo approccio rende immediata la comprensione di quale parte del sistema viene testata.
+
+Tecnologie di testing utilizzate:
+- JUnit 4
+
+
+
+TEST DI ISTANSIAZIONE DEL SERVICE:
+Questo test verifica che il PrenotazioneService possa essere creato correttamente, senza dipendenze mancanti o errori di configurazione.
+
+package com.turistafacoltoso.service;
+
+import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
+
+public class PrenotazioneServiceTest {
+
+    @Test
+    public void serviceCorretto() {
+        PrenotazioneService service = new PrenotazioneService();
+        assertNotNull(service);
+    }
+}
+
+
+Obiettivo del test:
+- Verificare che il service sia istanziabile
+- Confermare che il costruttore non lanci eccezioni
+- Test di “sanity check” molto comune nei progetti backend
+
+
+
+TEST DI VALIDAZIONE DELLE REGOLE DI BUSINESS:
+Una delle regole più importanti del sistema è che una prenotazione non può iniziare nel passato.
+Questa logica è implementata nel PrenotazioneService e viene verificata tramite un test dedicato.
+
+package com.turistafacoltoso.service;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import org.junit.Test;
+
+public class PrenotazioneDataPassataTest {
+
+    @Test(expected = IllegalArgumentException.class)
+    public void prenotazioneConDataPassataLanciaEccezione() {
+
+        PrenotazioneService service = new PrenotazioneService();
+
+        PrenotazioneCreateDTO dto = new PrenotazioneCreateDTO();
+        dto.setUtenteId(UUID.randomUUID());
+        dto.setAbitazioneId(UUID.randomUUID());
+        dto.setDataInizio(LocalDate.now().minusDays(1));
+        dto.setDataFine(LocalDate.now().plusDays(3));
+
+        service.createPrenotazione(dto);
+    }
+}
+
+
+Obiettivo del test:
+- Verificare che il sistema blocchi prenotazioni non valide
+- Confermare che venga lanciata una IllegalArgumentException
+- Testare una regola di business reale, non banale
+- Questo tipo di test è fondamentale per garantire l’integrità dei dati e la coerenza del sistema.
+
+
+
+
+IMPLEMENTAZIONI FUTURE:
+- Pagina dedicata ad utenti per visualizzare le case disponibili, con i relativi feedback
+- Aggiunta di eccezioni personalizzate
+- Test anche sul frontend
+
+
+
+

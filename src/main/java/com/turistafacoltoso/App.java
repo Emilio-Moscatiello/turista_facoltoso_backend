@@ -39,5 +39,8 @@ public class App {
     }
 }
 
-// mvn clean package
-// java -jar target/turista_facoltoso_backend-1.0-SNAPSHOT.jar
+// 1. avvia il db -> turista_facoltoso
+// 2. mvn clean package
+// 3. java -jar target/turista_facoltoso_backend-1.0-SNAPSHOT.jar
+// 4. apri turista_facoltoso_frontend
+// 5. npm run dev
