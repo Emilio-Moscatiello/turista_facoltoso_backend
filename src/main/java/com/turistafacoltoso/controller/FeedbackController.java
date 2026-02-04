@@ -18,6 +18,10 @@ public class FeedbackController {
 
     private void registerRoutes(Javalin app) {
 
+        app.get("/feedback", ctx -> {
+            ctx.json(feedbackService.getAllWithDetails());
+        });
+
         app.post("/prenotazioni/{prenotazioneId}/feedback", ctx -> {
             UUID prenotazioneId = UUID.fromString(ctx.pathParam("prenotazioneId"));
             FeedbackCreateDTO dto = ctx.bodyAsClass(FeedbackCreateDTO.class);

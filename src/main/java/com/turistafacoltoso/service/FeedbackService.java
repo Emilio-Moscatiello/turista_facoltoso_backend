@@ -1,9 +1,11 @@
 package com.turistafacoltoso.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.turistafacoltoso.dto.FeedbackCreateDTO;
+import com.turistafacoltoso.dto.FeedbackListDTO;
 import com.turistafacoltoso.model.Feedback;
 import com.turistafacoltoso.repository.FeedbackRepository;
 
@@ -31,5 +33,9 @@ public class FeedbackService {
 
         feedbackRepository.save(feedback);
         return feedback;
+    }
+
+    public List<FeedbackListDTO> getAllWithDetails() {
+        return feedbackRepository.findAllWithDetails();
     }
 }

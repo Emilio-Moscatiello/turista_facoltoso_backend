@@ -200,11 +200,14 @@ public class PrenotazioneRepository {
                 SELECT
                     p.id        AS prenotazione_id,
                     p.utente_id AS utente_id,
+                    u.nome      AS utente_nome,
+                    u.cognome   AS utente_cognome,
                     a.nome      AS abitazione_nome,
                     p.data_inizio,
                     p.data_fine
                 FROM prenotazione p
                 JOIN abitazione a ON p.abitazione_id = a.id
+                JOIN utente u ON p.utente_id = u.id
                 WHERE a.host_id = ?
                 ORDER BY p.data_fine DESC
             """;
@@ -224,6 +227,8 @@ public class PrenotazioneRepository {
                             new PrenotazioneHostDTO(
                                     rs.getString("prenotazione_id"),
                                     rs.getString("utente_id"),
+                                    rs.getString("utente_nome"),
+                                    rs.getString("utente_cognome"),
                                     rs.getString("abitazione_nome"),
                                     rs.getDate("data_inizio").toString(),
                                     rs.getDate("data_fine").toString()));
