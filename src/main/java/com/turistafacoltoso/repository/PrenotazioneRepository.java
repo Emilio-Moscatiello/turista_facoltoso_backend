@@ -1,9 +1,11 @@
 package com.turistafacoltoso.repository;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -203,6 +205,7 @@ public class PrenotazioneRepository {
                     u.nome      AS utente_nome,
                     u.cognome   AS utente_cognome,
                     a.nome      AS abitazione_nome,
+                    a.prezzo    AS prezzo_notte,
                     p.data_inizio,
                     p.data_fine
                 FROM prenotazione p
@@ -223,6 +226,17 @@ public class PrenotazioneRepository {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    LocalDate di = rs.getDate("data_inizio").toLocalDate();
+                    LocalDate df = rs.getDate("data_fine").toLocalDate();
+                    BigDecimal prezzoNotte = rs.getBigDecimal("prezzo_notte");
+                    long notti = ChronoUnit.DAYS.between(di, df);
+                    if (notti < 0) {
+                        notti = 0;
+                    }
+                    BigDecimal costoTotale = prezzoNotte != null
+                            ? prezzoNotte.multiply(BigDecimal.valueOf(notti))
+                            : null;
+
                     list.add(
                             new PrenotazioneHostDTO(
                                     rs.getString("prenotazione_id"),
@@ -230,8 +244,10 @@ public class PrenotazioneRepository {
                                     rs.getString("utente_nome"),
                                     rs.getString("utente_cognome"),
                                     rs.getString("abitazione_nome"),
-                                    rs.getDate("data_inizio").toString(),
-                                    rs.getDate("data_fine").toString()));
+                                    di.toString(),
+                                    df.toString(),
+                                    prezzoNotte != null ? prezzoNotte.toString() : null,
+                                    costoTotale != null ? costoTotale.toString() : null));
                 }
             }
 

@@ -14,4 +14,7 @@ public class PrenotazioneHostDTO {
     private String abitazioneNome;
     private String dataInizio;
     private String dataFine;
+    // prezzo a notte e costo totale (come stringhe per semplificare la serializzazione)
+    private String prezzoNotte;
+    private String costoTotale;
 }
